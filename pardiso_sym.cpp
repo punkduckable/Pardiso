@@ -24,8 +24,7 @@ using namespace std;
 #include "pardiso.h"
 
 
-int main( void )
-{
+int main(void) {
     /* Matrix data. */
     int    n = 8;
 
@@ -79,24 +78,20 @@ int main( void )
 /* ..  Setup Pardiso control parameters.                                */
 /* -------------------------------------------------------------------- */
 
-    error = 0;
-    solver = 0; /* use sparse direct solver */
+    error = 0;         /* Set error flag. 0 means no error. */
+    solver = 0;        /* use sparse direct solver */
     pardisoinit (pt,  &mtype, &solver, iparm, dparm, &error);
 
     if (error != 0) {
-      // Report the erorr.
+      // Report the erorr and then return.
       Report_Pardiso_Error(error);
-
-      // Now return.
       return 1;
     } // if (error != 0) {
-    else
-        printf("[PARDISO]: License check was successful ... \n");
+    else { printf("[PARDISO]: License check was successful ... \n"); }
 
     /* Numbers of processors, value of OMP_NUM_THREADS */
     var = getenv("OMP_NUM_THREADS");
-    if(var != NULL)
-        sscanf( var, "%d", &num_procs );
+    if(var != NULL) { sscanf( var, "%d", &num_procs ); }
     else {
         printf("Set environment OMP_NUM_THREADS to 1\n");
         exit(1);
@@ -107,23 +102,17 @@ int main( void )
     mnum   = 1;         /* Which factorization to use. */
 
     msglvl = 1;         /* Print statistical information  */
-    error  = 0;         /* Initialize error flag */
+    error  = 0;         /* Reset error flag. 0 means no error. */
 
 /* -------------------------------------------------------------------- */
 /* ..  Convert matrix from 0-based C-notation to Fortran 1-based        */
 /*     notation.                                                        */
 /* -------------------------------------------------------------------- */
-    for (i = 0; i < n+1; i++) {
-        ia[i] += 1;
-    }
-    for (i = 0; i < nnz; i++) {
-        ja[i] += 1;
-    }
+    for (i = 0; i < n+1; i++) { ia[i] += 1; }
+    for (i = 0; i < nnz; i++) { ja[i] += 1; }
 
     /* Set right hand side to one. */
-    for (i = 0; i < n; i++) {
-        b[i] = 1;
-    }
+    for (i = 0; i < n; i++) { b[i] = 1; }
 
 /* -------------------------------------------------------------------- */
 /*  .. pardiso_chk_matrix(...)                                          */
@@ -133,9 +122,10 @@ int main( void )
 
     pardiso_chkmatrix  (&mtype, &n, a, ia, ja, &error);
     if (error != 0) {
-        printf("ERROR in consistency of matrix: %d\n", error);
+        printf("ERROR in consistency of matrix\n");
+        Report_Pardiso_Error(error);
         exit(1);
-    }
+    } // if (error != 0) {
 
 /* -------------------------------------------------------------------- */
 /* ..  pardiso_chkvec(...)                                              */
@@ -146,9 +136,10 @@ int main( void )
 
     pardiso_chkvec (&n, &nrhs, b, &error);
     if (error != 0) {
-        printf("ERROR  in right hand side: %d\n", error);
+        printf("ERROR  in right hand side\n");
+        Report_Pardiso_Error(error);
         exit(1);
-    }
+    } // if (error != 0) {
 
 /* -------------------------------------------------------------------- */
 /* .. pardiso_printstats(...)                                           */
@@ -158,9 +149,10 @@ int main( void )
 
     pardiso_printstats (&mtype, &n, a, ia, ja, &nrhs, b, &error);
     if (error != 0) {
-        printf("ERROR right hand side: %d\n", error);
+        printf("ERROR right hand side\n");
+        Report_Pardiso_Error(error);
         exit(1);
-    }
+    } // if (error != 0) {
 
 /* -------------------------------------------------------------------- */
 /* ..  Reordering and Symbolic Factorization.  This step also allocates */
@@ -173,9 +165,10 @@ int main( void )
              iparm, &msglvl, &ddum, &ddum, &error, dparm);
 
     if (error != 0) {
-        printf("ERROR during symbolic factorization: %d\n", error);
+        printf("ERROR during symbolic factorization\n");
+        Report_Pardiso_Error(error);
         exit(1);
-    }
+    } // if (error != 0) {
     printf("\nReordering completed ... \n");
     printf("Number of nonzeros in factors  = %d\n", iparm[17]);
     printf("Number of factorization MFLOPS = %d\n", iparm[18]);
@@ -191,9 +184,10 @@ int main( void )
              iparm, &msglvl, &ddum, &ddum, &error,  dparm);
 
     if (error != 0) {
-        printf("ERROR during numerical factorization: %d\n", error);
+        printf("ERROR during numerical factorization\n");
+        Report_Pardiso_Error(error);
         exit(2);
-    }
+    } // if (error != 0) {
     printf("\nFactorization completed ...\n");
 
 /* -------------------------------------------------------------------- */
@@ -208,26 +202,20 @@ int main( void )
              iparm, &msglvl, b, x, &error,  dparm);
 
     if (error != 0) {
-        printf("ERROR during solution: %d\n", error);
+        printf("ERROR during solution\n");
+        Report_Pardiso_Error(error);
         exit(3);
-    }
+    } // if (error != 0) {
 
     printf("\nSolve completed ... \n");
-    printf("The solution of the system is: ");
-    for (i = 0; i < n; i++) {
-        printf("\n x [%d] = % f", i, x[i] );
-    }
-    printf ("\n");
+    printf("The solution of the system is: \n");
+    for (i = 0; i < n; i++) { printf("x [%d] = % f\n", i, x[i] ); }
 
 /* -------------------------------------------------------------------- */
 /* ..  Convert matrix back to 0-based C-notation.                       */
 /* -------------------------------------------------------------------- */
-    for (i = 0; i < n+1; i++) {
-        ia[i] -= 1;
-    }
-    for (i = 0; i < nnz; i++) {
-        ja[i] -= 1;
-    }
+    for (i = 0; i < n+1; i++) { ia[i] -= 1; }
+    for (i = 0; i < nnz; i++) { ja[i] -= 1; }
 
 /* -------------------------------------------------------------------- */
 /* ..  Termination and release of memory.                               */
@@ -239,4 +227,4 @@ int main( void )
              iparm, &msglvl, &ddum, &ddum, &error,  dparm);
 
     return 0;
-}
+} // int main(void) {
