@@ -46,7 +46,7 @@ int main(void) {
                                                    11.0,
                                                          5.0 };
 
-    int      nnz = ia[n];       /* For this example, should be 18 */
+    int      nnz = ia[n];       /* For this example, nnz should be 18 */
     int      mtype = -2;        /* Real symmetric matrix */
 
     /* RHS and solution vectors. */
@@ -112,7 +112,7 @@ int main(void) {
     for (i = 0; i < nnz; i++) { ja[i] += 1; }
 
     /* Set right hand side to one. */
-    for (i = 0; i < n; i++) { b[i] = 1; }
+    for (i = 0; i < n; i++) { b[i] = i; }
 
 /* -------------------------------------------------------------------- */
 /*  .. pardiso_chk_matrix(...)                                          */
