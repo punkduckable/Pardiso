@@ -71,8 +71,8 @@ int main( void )
     char    *var;
     int      i;
 
-    double   ddum;              /* Double dummy */
-    int      idum;              /* Integer dummy. */
+    double   ddum;              /* Double dummy. Passed as the D and X parameters (Pardiso) in phases 11 and 22. */
+    int      idum;              /* Integer dummy. Passed as the PERM parameter (Pardiso). */
 
 
 /* -------------------------------------------------------------------- */
@@ -83,16 +83,13 @@ int main( void )
     solver = 0; /* use sparse direct solver */
     pardisoinit (pt,  &mtype, &solver, iparm, dparm, &error);
 
-    if (error != 0)
-    {
-        if (error == -10 )
-           printf("No license file found \n");
-        if (error == -11 )
-           printf("License is expired \n");
-        if (error == -12 )
-           printf("Wrong username or hostname \n");
-         return 1;
-    }
+    if (error != 0) {
+      // Report the erorr.
+      Report_Pardiso_Error(error);
+
+      // Now return.
+      return 1;
+    } // if (error != 0) {
     else
         printf("[PARDISO]: License check was successful ... \n");
 
@@ -103,7 +100,7 @@ int main( void )
     else {
         printf("Set environment OMP_NUM_THREADS to 1\n");
         exit(1);
-    }
+    } // else {
     iparm[2]  = num_procs;
 
     maxfct = 1;		      /* Maximum number of numerical factorizations.  */
